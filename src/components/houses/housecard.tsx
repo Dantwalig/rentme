@@ -16,13 +16,13 @@ export default function HouseCard({ house, showContact = false }: HouseCardProps
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-bold text-gray-900">{house.type}</h3>
-          <span className="text-2xl font-bold text-blue-600">${house.price}/mo</span>
+          <span className="text-2xl font-bold text-blue-600">{house.price.toLocaleString()} RWF/mo</span>
         </div>
         
         <div className="space-y-2 text-gray-600">
           <div className="flex items-center">
             <MapPin className="w-4 h-4 mr-2" />
-            <span>{house.sector}, {house.district}</span>
+            <span>{house.sector}, {house.district}, {house.province}</span>
           </div>
           <div className="flex items-center">
             <BedDouble className="w-4 h-4 mr-2" />

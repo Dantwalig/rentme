@@ -2,38 +2,52 @@
 
 import { Filter } from 'lucide-react';
 import { Filters } from '../../types';
-import { useRwandaLocations } from '../../hooks/useRwandaLocations';
 
 interface HouseFiltersProps {
   filters: Filters;
   setFilters: (filters: Filters) => void;
 }
 
-export default function HouseFilters({ filters, setFilters }: HouseFiltersProps) {
-  const { 
-    provinces, 
-    districts, 
-    sectors, 
-    loading, 
-    getDistrictsByProvince, 
-    getSectorsByDistrict 
-  } = useRwandaLocations();
+// Rwanda locations data
+const rwandaLocations = {
+  provinces: ['Kigali', 'East', 'West', 'North', 'South'],
+  districts: {
+    'Kigali': ['Gasabo', 'Kicukiro', 'Nyarugenge'],
+    'East': ['Bugesera', 'Gatsibo', 'Kayonza', 'Kirehe', 'Ngoma', 'Nyagatare', 'Rwamagana'],
+    'West': ['Karongi', 'Ngororero', 'Nyabihu', 'Nyamasheke', 'Rubavu', 'Rusizi', 'Rutsiro'],
+    'North': ['Burera', 'Gakenke', 'Gicumbi', 'Musanze', 'Rulindo'],
+    'South': ['Gisagara', 'Huye', 'Kamonyi', 'Muhanga', 'Nyamagabe', 'Nyanza', 'Nyaruguru', 'Ruhango']
+  },
+  sectors: {
+    'Gasabo': ['Bumbogo', 'Gatsata', 'Gikomero', 'Gisozi', 'Jabana', 'Jali', 'Kacyiru', 'Kimihurura', 'Kimironko', 'Kinyinya', 'Ndera', 'Nduba', 'Remera', 'Rusororo', 'Rutunga'],
+    'Kicukiro': ['Gahanga', 'Gatenga', 'Gikondo', 'Kagarama', 'Kanombe', 'Kicukiro', 'Kigarama', 'Masaka', 'Niboye', 'Nyarugunga'],
+    'Nyarugenge': ['Gitega', 'Kanyinya', 'Kigali', 'Kimisagara', 'Mageragere', 'Muhima', 'Nyakabanda', 'Nyamirambo', 'Nyarugenge', 'Rwezamenyo'],
+    'Huye': ['Gishamvu', 'Karama', 'Kigoma', 'Kinazi', 'Maraba', 'Mbazi', 'Mukura', 'Ngoma', 'Ruhashya', 'Rusatira', 'Rwaniro', 'Simbi', 'Tumba', 'Huye'],
+    'Rwamagana': ['Fumbwe', 'Gahengeri', 'Gishari', 'Karenge', 'Kigabiro', 'Muhazi', 'Munyaga', 'Munyiginya', 'Musha', 'Muyumbu', 'Mwulire', 'Nyakariro', 'Nzige', 'Rubona'],
+    'Rubavu': ['Bugeshi', 'Busasamana', 'Cyanzarwe', 'Gisenyi', 'Kanama', 'Kanzenze', 'Mudende', 'Nyakiriba', 'Nyamyumba', 'Nyundo', 'Rubavu', 'Rugerero'],
+    'Musanze': ['Busogo', 'Cyuve', 'Gacaca', 'Gashaki', 'Gataraga', 'Kimonyi', 'Kinigi', 'Muhoza', 'Muko', 'Musanze', 'Nkotsi', 'Nyange', 'Remera', 'Rwaza', 'Shingiro'],
+    'Nyagatare': ['Gatunda', 'Karama', 'Karangazi', 'Katabagemu', 'Kiyombe', 'Matimba', 'Mimuli', 'Mukama', 'Musheri', 'Nyagatare', 'Rukomo', 'Rwempasha', 'Rwimiyaga', 'Tabagwe'],
+    'Muhanga': ['Cyeza', 'Kabacuzi', 'Kibangu', 'Kiyumba', 'Muhanga', 'Mushishiro', 'Nyabinoni', 'Nyamabuye', 'Nyarusange', 'Rongi', 'Rugendabari', 'Shyogwe'],
+    'Rusizi': ['Bugarama', 'Butare', 'Bweyeye', 'Gikundamvura', 'Giheke', 'Gihundwe', 'Gitambi', 'Kamembe', 'Muganza', 'Mururu', 'Nkanka', 'Nkombo', 'Nkungu', 'Nyakabuye', 'Nyakarenzo', 'Nzahaha', 'Rwimbogo']
+  }
+};
 
+export default function HouseFilters({ filters, setFilters }: HouseFiltersProps) {
   // Get filtered districts and sectors based on selection
   const availableDistricts = filters.province && filters.province !== 'All'
-    ? getDistrictsByProvince(filters.province)
-    : districts;
+    ? rwandaLocations.districts[filters.province as keyof typeof rwandaLocations.districts] || []
+    : [];
     
   const availableSectors = filters.district && filters.district !== 'All'
-    ? getSectorsByDistrict(filters.district)
-    : sectors;
+    ? rwandaLocations.sectors[filters.district as keyof typeof rwandaLocations.sectors] || []
+    : [];
 
   const handleProvinceChange = (provinceId: string) => {
     setFilters({
       ...filters,
       province: provinceId,
-      district: 'All', // Reset district when province changes
-      sector: 'All' // Reset sector when province changes
+      district: 'All',
+      sector: 'All'
     });
   };
 
@@ -41,20 +55,9 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
     setFilters({
       ...filters,
       district: districtId,
-      sector: 'All' // Reset sector when district changes
+      sector: 'All'
     });
   };
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <div className="flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">Loading filters...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -63,7 +66,7 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
         <h3 className="text-lg font-bold text-gray-900">Filters</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Province
@@ -73,10 +76,10 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
             onChange={(e) => handleProvinceChange(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
-            <option key="all-provinces" value="All">All Provinces</option>
-            {provinces.map((province) => (
-              <option key={`province-${province.id}`} value={province.id}>
-                {province.name}
+            <option value="All">All Provinces</option>
+            {rwandaLocations.provinces.map((province) => (
+              <option key={province} value={province}>
+                {province}
               </option>
             ))}
           </select>
@@ -92,10 +95,14 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
             disabled={!filters.province || filters.province === 'All'}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
-            <option key="all-districts" value="All">All Districts</option>
+            <option value="All">
+              {!filters.province || filters.province === 'All' 
+                ? 'Select province first' 
+                : 'All Districts'}
+            </option>
             {availableDistricts.map((district) => (
-              <option key={`district-${district.id}`} value={district.id}>
-                {district.name}
+              <option key={district} value={district}>
+                {district}
               </option>
             ))}
           </select>
@@ -111,10 +118,14 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
             disabled={!filters.district || filters.district === 'All'}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
-            <option key="all-sectors" value="All">All Sectors</option>
+            <option value="All">
+              {!filters.district || filters.district === 'All'
+                ? 'Select district first'
+                : 'All Sectors'}
+            </option>
             {availableSectors.map((sector) => (
-              <option key={`sector-${sector.id}`} value={sector.id}>
-                {sector.name}
+              <option key={sector} value={sector}>
+                {sector}
               </option>
             ))}
           </select>
@@ -154,7 +165,7 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Min Price ($)
+            Min Price (RWF)
           </label>
           <input
             type="number"
@@ -167,7 +178,7 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Max Price ($)
+            Max Price (RWF)
           </label>
           <input
             type="number"
