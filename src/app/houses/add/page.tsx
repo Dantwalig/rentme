@@ -3,11 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../../../components/layout/navbar';
+import { useRwandaLocations } from '../../../hooks/useRwandaLocations';
 
 export default function AddHousePage() {
   const router = useRouter();
+  const { provinces, districts, sectors, loading, error, getDistrictsByProvince, getSectorsByDistrict } = useRwandaLocations();
+  
   const [formData, setFormData] = useState({
     type: 'Whole House',
+    province: '',
     district: '',
     sector: '',
     rooms: '',
@@ -25,6 +29,32 @@ export default function AddHousePage() {
     ownerIdNumber: '',
     upiDocument: null as File | null
   });
+
+  // Get filtered districts and sectors based on selection
+  const availableDistricts = formData.province 
+    ? getDistrictsByProvince(formData.province)
+    : [];
+    
+  const availableSectors = formData.district
+    ? getSectorsByDistrict(formData.district)
+    : [];
+
+  const handleProvinceChange = (provinceId: string) => {
+    setFormData({
+      ...formData,
+      province: provinceId,
+      district: '', // Reset district when province changes
+      sector: '' // Reset sector when province changes
+    });
+  };
+
+  const handleDistrictChange = (districtId: string) => {
+    setFormData({
+      ...formData,
+      district: districtId,
+      sector: '' // Reset sector when district changes
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +75,35 @@ export default function AddHousePage() {
     alert('House added successfully! It will be verified within 24 hours.');
     router.push('/houses');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar showAddHouse={false} />
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading location data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar showAddHouse={false} />
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <div className="bg-white rounded-lg shadow-md p-8">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-800">Error loading locations: {error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,18 +132,42 @@ export default function AddHousePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Province *
+                </label>
+                <select
+                  required
+                  value={formData.province}
+                  onChange={(e) => handleProvinceChange(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Province</option>
+                  {provinces.map((province) => (
+                    <option key={province.id} value={province.id}>
+                      {province.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   District *
                 </label>
                 <select
                   required
                   value={formData.district}
-                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => handleDistrictChange(e.target.value)}
+                  disabled={!formData.province}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select District</option>
-                  <option value="Kigali">Kigali</option>
-                  <option value="Musanze">Musanze</option>
-                  <option value="Huye">Huye</option>
+                  <option value="">
+                    {formData.province ? 'Select District' : 'Select Province First'}
+                  </option>
+                  {availableDistricts.map((district) => (
+                    <option key={district.id} value={district.id}>
+                      {district.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -96,13 +179,17 @@ export default function AddHousePage() {
                   required
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  disabled={!formData.district}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                 >
-                  <option value="">Select Sector</option>
-                  <option value="Kimironko">Kimironko</option>
-                  <option value="Remera">Remera</option>
-                  <option value="Kicukiro">Kicukiro</option>
-                  <option value="Nyarugenge">Nyarugenge</option>
+                  <option value="">
+                    {formData.district ? 'Select Sector' : 'Select District First'}
+                  </option>
+                  {availableSectors.map((sector) => (
+                    <option key={sector.id} value={sector.id}>
+                      {sector.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 

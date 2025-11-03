@@ -1,7 +1,7 @@
-// types/index.ts
 export interface House {
   id: number;
   type: 'Whole House' | 'Room';
+  province?: string;
   district: string;
   sector: string;
   rooms: number;
@@ -38,6 +38,7 @@ export interface User {
 }
 
 export interface Filters {
+  province?: string;
   district: string;
   sector: string;
   type: string;

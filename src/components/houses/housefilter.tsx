@@ -2,6 +2,7 @@
 
 import { Filter } from 'lucide-react';
 import { Filters } from '../../types';
+import { useRwandaLocations } from '../../hooks/useRwandaLocations';
 
 interface HouseFiltersProps {
   filters: Filters;
@@ -9,6 +10,52 @@ interface HouseFiltersProps {
 }
 
 export default function HouseFilters({ filters, setFilters }: HouseFiltersProps) {
+  const { 
+    provinces, 
+    districts, 
+    sectors, 
+    loading, 
+    getDistrictsByProvince, 
+    getSectorsByDistrict 
+  } = useRwandaLocations();
+
+  // Get filtered districts and sectors based on selection
+  const availableDistricts = filters.province && filters.province !== 'All'
+    ? getDistrictsByProvince(filters.province)
+    : districts;
+    
+  const availableSectors = filters.district && filters.district !== 'All'
+    ? getSectorsByDistrict(filters.district)
+    : sectors;
+
+  const handleProvinceChange = (provinceId: string) => {
+    setFilters({
+      ...filters,
+      province: provinceId,
+      district: 'All', // Reset district when province changes
+      sector: 'All' // Reset sector when province changes
+    });
+  };
+
+  const handleDistrictChange = (districtId: string) => {
+    setFilters({
+      ...filters,
+      district: districtId,
+      sector: 'All' // Reset sector when district changes
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading filters...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
       <div className="flex items-center mb-4">
@@ -19,17 +66,38 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
+            Province
+          </label>
+          <select
+            value={filters.province || 'All'}
+            onChange={(e) => handleProvinceChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option key="all-provinces" value="All">All Provinces</option>
+            {provinces.map((province) => (
+              <option key={`province-${province.id}`} value={province.id}>
+                {province.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             District
           </label>
           <select
-            value={filters.district}
-            onChange={(e) => setFilters({ ...filters, district: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={filters.district || 'All'}
+            onChange={(e) => handleDistrictChange(e.target.value)}
+            disabled={!filters.province || filters.province === 'All'}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
-            <option value="All">All</option>
-            <option value="Kigali">Kigali</option>
-            <option value="Musanze">Musanze</option>
-            <option value="Huye">Huye</option>
+            <option key="all-districts" value="All">All Districts</option>
+            {availableDistricts.map((district) => (
+              <option key={`district-${district.id}`} value={district.id}>
+                {district.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -38,14 +106,17 @@ export default function HouseFilters({ filters, setFilters }: HouseFiltersProps)
             Sector
           </label>
           <select
-            value={filters.sector}
+            value={filters.sector || 'All'}
             onChange={(e) => setFilters({ ...filters, sector: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            disabled={!filters.district || filters.district === 'All'}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
-            <option value="All">All</option>
-            <option value="Kimironko">Kimironko</option>
-            <option value="Remera">Remera</option>
-            <option value="Kicukiro">Kicukiro</option>
+            <option key="all-sectors" value="All">All Sectors</option>
+            {availableSectors.map((sector) => (
+              <option key={`sector-${sector.id}`} value={sector.id}>
+                {sector.name}
+              </option>
+            ))}
           </select>
         </div>
 
