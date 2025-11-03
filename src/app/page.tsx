@@ -85,7 +85,7 @@ export default function LandingPage() {
 
         <div className="text-center mt-12">
           <Link
-            href="/login"
+            href="/auth/login"
             className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-lg inline-block"
           >
             View All Properties
