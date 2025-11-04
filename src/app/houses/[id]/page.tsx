@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Home, MapPin, BedDouble, Building, Mail, Phone, MessageSquare, X, Car, PawPrint, Sofa, Layers, ArrowLeft, Calendar, Users } from 'lucide-react';
 import FloatingChat from '../../../components/chat/floatingchats';
@@ -289,12 +289,15 @@ const mockHouses = [
   }
 ];
 
-export default function HouseDetailPage({ params }: { params: { id: string } }) {
+export default function HouseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [currentImage, setCurrentImage] = useState(0);
 
+  // Unwrap the params Promise using React.use()
+  const { id } = use(params);
+
   // Find the house by ID from URL params
-  const houseData = mockHouses.find(house => house.id === parseInt(params.id));
+  const houseData = mockHouses.find(house => house.id === parseInt(id));
 
   // If house not found, show error
   if (!houseData) {
@@ -568,11 +571,12 @@ export default function HouseDetailPage({ params }: { params: { id: string } }) 
         </div>
       </div>
 
-      {/* Floating Chat with Owner Info */}
+      {/* Floating Chat Button*/}
       <FloatingChat 
         ownerName={houseData.ownerName}
         ownerPhone={houseData.ownerPhone}
         propertyTitle={`${houseData.type} in ${houseData.sector}`}
+        propertyId={houseData.id}
       />
     </div>
   );
