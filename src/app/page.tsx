@@ -4,15 +4,16 @@ import Navbar from '../components/layout/navbar';
 import HouseCard from '../components/houses/housecard';
 import { House } from '../types';
 
-// Mock data - In production, this would come from your database
+// Mock data - In production, this should come from the database or an API
 const mockHouses: House[] = [
   {
     id: 1,
     type: 'Whole House',
-    district: 'Kigali',
+    province: 'Kigali',
+    district: 'Gasabo',
     sector: 'Kimironko',
     rooms: 3,
-    price: 1200,
+    price: 600000,
     surface: 120,
     parking: 'Available',
     animals: 'Allowed',
@@ -27,10 +28,11 @@ const mockHouses: House[] = [
   {
     id: 2,
     type: 'Room',
-    district: 'Kigali',
-    sector: 'Remera',
+    province: 'Kigali',
+    district: 'Kicukiro',
+    sector: 'Gikondo',
     rooms: 1,
-    price: 400,
+    price: 200000,
     surface: 25,
     parking: 'Not Available',
     animals: 'Not Allowed',
@@ -45,10 +47,11 @@ const mockHouses: House[] = [
   {
     id: 3,
     type: 'Whole House',
-    district: 'Kigali',
-    sector: 'Kicukiro',
+    province: 'Kigali',
+    district: 'Nyarugenge',
+    sector: 'Nyarugenge',
     rooms: 4,
-    price: 1800,
+    price: 900000,
     surface: 150,
     parking: 'Available',
     animals: 'Allowed',
